@@ -13,6 +13,11 @@
 namespace CacheFy;
 
 use CacheFy\src\FrontEnd;
+use CacheFy\src\CacheAdmin;
+
+/* Plugin Defination */
+define('CFY_DIR', WP_CONTENT_DIR . "/cache/");
+define('CFY_DEBUG', true);
 
 require 'vendor/autoload.php';
 
@@ -21,20 +26,48 @@ require 'vendor/autoload.php';
  *
  * @author Apon
  */
+//WPMU_PLUGIN_DIR
+//muplugins_loaded
+//plugins_loaded
+
 class Cache {
 
     public object $frontEnd;
+    public object $cacheAdmin;
 
     //put your code here
     public function __construct() {
+        register_activation_hook(__FILE__, [self::class, 'cache_pre_active_task']);
+        register_deactivation_hook(__FILE__, [self::class, 'cache_uninstall']);
         if (is_admin()) {
-            
+            $this->cacheAdmin = new CacheAdmin;
         } else {
             $this->frontEnd = new FrontEnd();
-            $this->frontEnd::FrontEndInit();
         }
+    }
+
+    /**
+     * Plugin Initialize
+     * @return \CacheFy\Cache
+     */
+    static function init() {
+        return new Cache();
+    }
+
+    /**
+     * Plugin Active Hook
+     */
+    public static function cache_pre_active_task() {
+        
+    }
+
+    /**
+     * Plugin Deactivation Hook
+     */
+    public static function cache_uninstall() {
+        
     }
 
 }
 
-$cache = new Cache();
+Cache::init();
