@@ -16,7 +16,11 @@ use CacheFy\src\FrontEnd;
 use CacheFy\src\CacheAdmin;
 
 /* Plugin Defination */
-define('CFY_DIR', WP_CONTENT_DIR . "/cache/");
+define('CFY', dirname(__FILE__));
+if (!defined('CFY_DIR')) {
+    define('CFY_DIR', WP_CONTENT_DIR . "/cache/");
+}
+define('__CFY_ASSETS', plugin_dir_url(__FILE__) . "assets/");
 define('CFY_DEBUG', true);
 
 require 'vendor/autoload.php';
@@ -26,17 +30,20 @@ require 'vendor/autoload.php';
  *
  * @author Apon
  */
-//WPMU_PLUGIN_DIR
+//WPMU_PLUGIN_DIR;
 //muplugins_loaded
 //plugins_loaded
 
 class Cache {
+
+    use src\Methods;
 
     public object $frontEnd;
     public object $cacheAdmin;
 
     //put your code here
     public function __construct() {
+
         register_activation_hook(__FILE__, [self::class, 'cache_pre_active_task']);
         register_deactivation_hook(__FILE__, [self::class, 'cache_uninstall']);
         if (is_admin()) {
@@ -58,14 +65,14 @@ class Cache {
      * Plugin Active Hook
      */
     public static function cache_pre_active_task() {
-        
+        self::dirInit();
     }
 
     /**
      * Plugin Deactivation Hook
      */
     public static function cache_uninstall() {
-        
+        self::rrmdir(CFY_DIR);
     }
 
 }

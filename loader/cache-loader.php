@@ -1,25 +1,22 @@
 <?php
 
-namespace CacheFy\src;
+namespace CacheFyRoot;
 
-/**
- * Description of CacheLoader
- *
- * @author apon
- */
 if (!defined('CFY_DIR')) {
-    define('CFY_DIR', WP_CONTENT_DIR . "/cache/");
+    define('CFY_DIR', dirname(__FILE__) . "/wp-content/cache/");
 }
 
-class CacheLoader {
+/**
+ * Description of cache-loader
+ *
+ * @author Apon
+ */
+class RootCacheLoader {
 
     //put your code here
     public static $current_url;
     public static $fileName;
 
-    /**
-     * Set Current Request URL and File name 
-     */
     public static function setUrl() {
         $rootScript = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF'];
         $pathInfo = pathinfo($rootScript);
@@ -31,18 +28,15 @@ class CacheLoader {
     }
 
     public static function run() {
-        echo "------CACHE LOADER------";
-        self::die();
-    }
-
-    /**
-     * Close Connection and others after loaded from cache
-     * @global type $wpdb
-     */
-    public static function die() {
-        global $wpdb;
-        $wpdb->close();
-        exit;
+        self::setUrl();
+        if (file_exists(self::$fileName)) {
+            //echo "Root Event";
+            header('cache-type:Root-Event');
+            echo file_get_contents(self::$fileName);
+            exit;
+        }
     }
 
 }
+
+RootCacheLoader::run();
