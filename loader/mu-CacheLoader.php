@@ -10,6 +10,9 @@ namespace CacheFy\src;
 if (!defined('CFY_DIR')) {
     define('CFY_DIR', WP_CONTENT_DIR . "/cache/");
 }
+if (!defined('CFY_HEADERS')) {
+    define('CFY_HEADERS', 'CFY_HEADERS_JSON');
+}
 
 class CacheLoader {
 
@@ -37,6 +40,7 @@ class CacheLoader {
         self::getOption();
         if (isset(self::$option->enable) && !is_admin() && file_exists(self::$fileName)) {
             //echo "Mu plugin Event";
+            self::headerBuilder();
             header('cache-type:Mu-Event');
             echo file_get_contents(self::$fileName);
             self::die();
@@ -61,6 +65,17 @@ class CacheLoader {
             self::$option = (object) [];
         }
         return self::$option;
+    }
+
+    public static function headerBuilder() {
+        if (defined('CFY_HEADERS')) {
+            $headerJson = json_decode(CFY_HEADERS, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($headerJson) && count($headerJson) > 0) {
+                foreach ($headerJson as $header) {
+                    header($header);
+                }
+            }
+        }
     }
 
 }

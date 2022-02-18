@@ -73,6 +73,8 @@ class Cache {
      */
     public static function cache_uninstall() {
         self::rrmdir(CFY_DIR);
+        self::RemMuLoader();
+        self::RemRootLoader();
     }
 
 }

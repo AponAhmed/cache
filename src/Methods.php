@@ -44,10 +44,19 @@ trait Methods {
         }
     }
 
+    /**
+     * Parse header Information from header and set into self::$header Property as Array
+     */
     public static function SetHeader() {
+        self::getOption();
         //parse Header string, turn into array and put self::$headers
+        $headers = preg_split("/\r\n|\n|\r/", trim(self::$option->response_header));
+        self::$headers = array_filter(array_map('trim', $headers));
     }
 
+    /**
+     * Remove Root Cache Loader
+     */
     public static function RemRootLoader() {
         if (file_exists(self::$loaderRoot)) {
             unlink(self::$loaderRoot);
@@ -55,30 +64,58 @@ trait Methods {
         }
     }
 
+    /**
+     * Remove MU plugin With Condition
+     */
     public static function RemMuLoader() {
         if (file_exists(self::$loaderMu)) {
             unlink(self::$loaderMu);
         }
     }
 
+    /**
+     * Mu Plugin Creation 
+     */
     public static function putMuLoader() {
         $file = CFY . "/loader/mu-CacheLoader.php";
+        $scripts = file_get_contents($file);
+        //CFY_HEADERS_JSON //Key
         //put header information in loader file before create
-        copy($file, self::$loaderMu);
+        $scripts = self::str_replace_first('CFY_HEADERS_JSON', json_encode(self::$headers), $scripts);
+        $n = file_put_contents(self::$loaderMu, $scripts);
+        // var_dump($n);
+        //copy($file, self::$loaderMu);
     }
 
+    /**
+     * Put a loader file in root as cache-loader.php 
+     */
     public static function putRootLoader() {
         $file = CFY . "/loader/cache-loader.php";
+        $scripts = file_get_contents($file);
         //put header information in loader file before create
-        copy($file, self::$loaderRoot);
+        $scripts = self::str_replace_first('CFY_HEADERS_JSON', json_encode(self::$headers), $scripts);
+        file_put_contents(self::$loaderRoot, $scripts);
+        //copy($file, self::$loaderRoot);
         self::modifyLoader();
     }
 
+    /**
+     * Replace String First Match
+     * @param string $search
+     * @param mix $replace
+     * @param mix $subject
+     * @return string
+     */
     static function str_replace_first($search, $replace, $subject) {
         $search = '/' . preg_quote($search, '/') . '/';
         return preg_replace($search, $replace, $subject, 1);
     }
 
+    /**
+     * Modify Main Index file to pach-up Cache Loader
+     * @param string $state
+     */
     public static function modifyLoader(string $state = 'add') {
         $str = "#START CACHE LOADER
 require 'cache-loader.php';
@@ -96,6 +133,9 @@ require 'cache-loader.php';
         file_put_contents(ABSPATH . "index.php", $indexContent);
     }
 
+    /**
+     * Request Path Information
+     */
     public static function setFilename() {
         $rootScript = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF'];
         $pathInfo = pathinfo($rootScript);
@@ -110,7 +150,7 @@ require 'cache-loader.php';
      * Remove Files and Folder Recursively 
      * @param type $dir
      */
-    function rrmdir($dir) {
+    public static function rrmdir($dir) {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
@@ -154,6 +194,10 @@ require 'cache-loader.php';
         }
     }
 
+    /**
+     * Get option 
+     * @return Object $option
+     */
     public static function getOption() {
         $opt = get_option(self::$optionKey);
         if (is_array($opt)) {

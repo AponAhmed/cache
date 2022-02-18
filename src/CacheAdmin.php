@@ -107,7 +107,7 @@ class CacheAdmin {
     }
 
     function cleanAllCache() {
-        self::rrmdir(__CFY_ASSETS);
+        self::rrmdir(CFY_DIR);
     }
 
     function cacheLoaderRefresh() {

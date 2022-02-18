@@ -22,7 +22,16 @@ function updateCacheOption(_this) {
  * @returns {void}
  */
 function cleanAllCache(_this) {
+    console.log('Cleaning..');
+    let btn = jQuery(_this);
+    btn.find(".dashicons").remove();
+    btn.prepend('<span class="dashicons dashicons-update loading"></span>');
+    var data = {action: "cleanAllCache"};
+    jQuery.post(cacheJsObject.ajax_url, data, function (response) {
+        console.log(response);
+        btn.find('.loading').removeClass('loading dashicons-update').addClass('dashicons-saved');
 
+    });
 }
 
 /**

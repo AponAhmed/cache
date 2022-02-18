@@ -5,6 +5,9 @@ namespace CacheFyRoot;
 if (!defined('CFY_DIR')) {
     define('CFY_DIR', dirname(__FILE__) . "/wp-content/cache/");
 }
+if (!defined('CFY_HEADERS')) {
+    define('CFY_HEADERS', 'CFY_HEADERS_JSON');
+}
 
 /**
  * Description of cache-loader
@@ -31,9 +34,21 @@ class RootCacheLoader {
         self::setUrl();
         if (file_exists(self::$fileName)) {
             //echo "Root Event";
+            self::headerBuilder();
             header('cache-type:Root-Event');
             echo file_get_contents(self::$fileName);
             exit;
+        }
+    }
+
+    public static function headerBuilder() {
+        if (defined('CFY_HEADERS')) {
+            $headerJson = json_decode(CFY_HEADERS, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($headerJson) && count($headerJson) > 0) {
+                foreach ($headerJson as $header) {
+                    header($header);
+                }
+            }
         }
     }
 
