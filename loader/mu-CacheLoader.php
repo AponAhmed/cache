@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Mu Plugin for Cache File Loader 
+ */
+
 namespace CacheFy\src;
 
 /**

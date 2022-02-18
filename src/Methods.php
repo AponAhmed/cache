@@ -143,7 +143,13 @@ require 'cache-loader.php';
             $rqUri = str_replace($pathInfo['dirname'], "", $_SERVER['REQUEST_URI']);
         }
         self::$current_url = $rqUri;
-        self::$fileName = CFY_DIR . md5(self::$current_url);
+        $md5 = true;
+        if ($md5) {//md5
+            self::$fileName = CFY_DIR . md5(self::$current_url);
+        } else {
+            $modFileName = str_replace(["/"], ["~"], self::$current_url);
+            self::$fileName = CFY_DIR . $modFileName;
+        }
     }
 
     /**
@@ -172,11 +178,13 @@ require 'cache-loader.php';
         if (!is_dir(WPMU_PLUGIN_DIR)) {
             if (mkdir(WPMU_PLUGIN_DIR, 0777, true)) {
                 chmod(WPMU_PLUGIN_DIR, 0777);
+                file_put_contents(WPMU_PLUGIN_DIR . "/index.php", "<?php //Silence is golden");
             }
         }
         if (!is_dir(CFY_DIR)) {
             if (mkdir(CFY_DIR, 0777, true)) {
                 chmod(CFY_DIR, 0777);
+                file_put_contents(CFY_DIR . "index.php", "<?php //Silence is golden");
             }
         }
     }
@@ -209,6 +217,11 @@ require 'cache-loader.php';
             self::$option->cache_loader = 'mu-plugins';
         }
         return self::$option;
+    }
+
+    static function is_wplogin() {
+        $ABSPATH_MY = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, ABSPATH);
+        return ((in_array($ABSPATH_MY . 'wp-login.php', get_included_files()) || in_array($ABSPATH_MY . 'wp-register.php', get_included_files()) ) || (isset($_GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'wp-login.php') || $_SERVER['PHP_SELF'] == '/wp-login.php');
     }
 
 }

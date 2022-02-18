@@ -49,7 +49,9 @@ class Cache {
         if (is_admin()) {
             $this->cacheAdmin = new CacheAdmin;
         } else {
-            $this->frontEnd = new FrontEnd();
+            if (!self::is_wplogin()) {
+                $this->frontEnd = new FrontEnd();
+            }
         }
     }
 

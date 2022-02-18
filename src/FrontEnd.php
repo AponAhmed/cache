@@ -22,15 +22,18 @@ class FrontEnd {
      * Initialize hook after  plugins_loaded
      */
     public static function init() {
+        self::getOption();
         self::setFilename();
-        if (file_exists(self::$fileName)) {
-            //CacheLoader::run();//plugins_loaded Event
-            //echo "Init Event";
-            header('cache-type:init-event');
-            echo file_get_contents(self::$fileName);
-            self::die();
-        } else {
-            self::FrontEndInit();
+        if (isset(self::$option->enable)) {
+            if (file_exists(self::$fileName)) {
+                //CacheLoader::run();//plugins_loaded Event
+                //echo "Init Event";
+                header('cache-type:init-event');
+                echo file_get_contents(self::$fileName);
+                self::die();
+            } else {
+                self::FrontEndInit();
+            }
         }
     }
 
@@ -56,7 +59,10 @@ class FrontEnd {
      */
     static function storeCache($html) {
         //$html;
-        file_put_contents(self::$fileName, $html);
+        self::dirInit();
+        if (trim($html) != "") {
+            file_put_contents(self::$fileName, $html);
+        }
         return $html;
     }
 

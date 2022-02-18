@@ -109,3 +109,70 @@
     --b: var(--dot);
 }
 
+/*Cache Generate Part*/
+.ListWrap {
+    margin-top: 15px;
+}
+.cache-info-type-list-item {
+    display: flex;
+    max-width: 550px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0px;
+    padding: 5px;
+    margin: -1px 0;
+    border: 1px solid #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.cache-info-type-list-item .postType {
+    min-width: 250px;
+    text-transform: capitalize;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+}
+.itemControl {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+.cacheCbtn {
+    border: 1px solid #fff;
+    padding: 0px 6px;
+    margin-right: 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #444;
+    height: 22px;
+}
+.cacheCbtn .spinLoader {
+    padding: 0 12px;
+    background-size: 12px;
+    margin: 0;
+}
+
+.cacheCbtn.cln {
+    background: rgba(255,0,0,.2);
+    border: 1px solid #ffa0a0;
+}
+.cacheCbtn.Stop {
+    background: #fcc;
+    border-color: #e36c6c;
+}
+.cacheCbtn.Start {
+    background: #acf7b7;
+    border-color: #4caa64;
+
+}
+.prog {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: rgba(42, 183, 42, 0.2);
+    height: 100%;
+    transition: all .5s;
+}
