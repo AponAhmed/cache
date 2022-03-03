@@ -12,16 +12,17 @@ trait Methods {
     static string $optionKey = 'cache_options';
     static object $option;
     static string $current_url;
+    static string $fullPath;
     static string $fileName;
-    static string $loaderRoot;
-    static string $loaderMu;
+    static string $loaderRoot = ABSPATH . "cache-loader.php";
+    static string $loaderMu = WPMU_PLUGIN_DIR . "/mu-CacheLoader.php";
     static array $headers;
 
     public static function loaderConfig() {
         self::SetHeader();
         self::dirInit();
-        self::$loaderRoot = ABSPATH . "cache-loader.php";
-        self::$loaderMu = WPMU_PLUGIN_DIR . "/mu-CacheLoader.php";
+        //self::$loaderRoot = ABSPATH . "cache-loader.php";
+        //self::$loaderMu = WPMU_PLUGIN_DIR . "/mu-CacheLoader.php";
 
         if (!isset(self::$option->enable) || isset(self::$option->disable_loggedin)) {
             self::$option->cache_loader = "init";
@@ -133,6 +134,18 @@ require 'cache-loader.php';
         file_put_contents(ABSPATH . "index.php", $indexContent);
     }
 
+    static function is_ssl() {
+        if (isset($_SERVER['HTTPS'])) {
+            if ('on' == strtolower($_SERVER['HTTPS']))
+                return true;
+            if ('1' == $_SERVER['HTTPS'])
+                return true;
+        } elseif (isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] )) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Request Path Information
      */
@@ -140,9 +153,20 @@ require 'cache-loader.php';
         $rootScript = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF'];
         $pathInfo = pathinfo($rootScript);
         if (isset($pathInfo['dirname'])) {
-            $rqUri = str_replace($pathInfo['dirname'], "", $_SERVER['REQUEST_URI']);
+            if ($pathInfo['dirname'] != "/") {
+                $rqUri = str_replace($pathInfo['dirname'], "", $_SERVER['REQUEST_URI']);
+            } else {
+                $rqUri = $_SERVER['REQUEST_URI'];
+            }
         }
         self::$current_url = $rqUri;
+
+        $siteUrl = site_url();
+        $fullPath = $siteUrl . "/" . $rqUri;
+        $fullPath = preg_replace('/([^:])(\/{2,})/', '$1/', $fullPath);
+        self::$fullPath = $fullPath;
+        //var_dump(self::$fullPath);
+        //exit;
         $md5 = true;
         if ($md5) {//md5
             self::$fileName = CFY_DIR . md5(self::$current_url);

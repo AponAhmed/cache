@@ -38,16 +38,31 @@ function updateCacheOption(_this) {
  * @param {DOMObject} _this
  * @returns {void}
  */
-function cleanAllCache(_this) {
+function cleanAllCache(_this, bar) {
+    let c = confirm('Are You Sure to Clean All Cache ?');
+    if (!c) {
+        return;
+    }
     console.log('Cleaning..');
     let btn = jQuery(_this);
-    btn.find(".dashicons").remove();
-    btn.prepend('<span class="dashicons dashicons-update loading"></span>');
+    if (!bar) {
+        btn.find(".dashicons").remove();
+        btn.prepend('<span class="dashicons dashicons-update loading"></span>');
+    } else {
+        btn.html('Cleaning...');
+    }
     var data = {action: "cleanAllCache"};
     jQuery.post(cacheJsObject.ajax_url, data, function (response) {
         console.log(response);
-        btn.find('.loading').removeClass('loading dashicons-update').addClass('dashicons-saved');
-
+        if (!bar) {
+            btn.find('.loading').removeClass('loading dashicons-update').addClass('dashicons-saved');
+        } else {
+            btn.html('Cleane Succeed !');
+            btn.closest('.ab-sub-wrapper').prev().find('.cacheCount').html("0");
+            setTimeout(function () {
+                btn.html('Clean All Cache');
+            }, 2000);
+        }
     });
 }
 

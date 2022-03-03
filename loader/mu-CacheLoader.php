@@ -46,6 +46,10 @@ class CacheLoader {
             //echo "Mu plugin Event";
             self::headerBuilder();
             header('cache-type:Mu-Event');
+            header("cache-control:public, max-age=31536000");
+            header("expires:" . date("D, j M Y G:i:s", time() + 31536000) . " GMT");
+            header("content-type:text/html");
+            header("pragma:public");
             echo file_get_contents(self::$fileName);
             self::die();
         }

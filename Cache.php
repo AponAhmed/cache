@@ -46,6 +46,13 @@ class Cache {
 
         register_activation_hook(__FILE__, [self::class, 'cache_pre_active_task']);
         register_deactivation_hook(__FILE__, [self::class, 'cache_uninstall']);
+        //Frontend Ajax Action
+        add_action('wp_ajax_refresh_cache', [$this, 'refresh_cache']);
+        add_action('wp_ajax_nopriv_refresh_cache', [$this, 'refresh_cache']);
+
+        add_action('wp_ajax_remove_cache', [$this, 'remove_cache']);
+        add_action('wp_ajax_nopriv_remove_cache', [$this, 'remove_cache']);
+
         if (is_admin()) {
             $this->cacheAdmin = new CacheAdmin;
         } else {
@@ -53,6 +60,25 @@ class Cache {
                 $this->frontEnd = new FrontEnd();
             }
         }
+    }
+
+    function refresh_cache() {
+        if (isset($_POST['curl'])) {
+            $lnk = trim($_POST['curl']);
+            $cache = new src\createCache();
+            $cache->deleteCacheFile($lnk);
+            $cache->file_get_contents_curl($lnk);
+        }
+        wp_die();
+    }
+
+    function remove_cache() {
+        if (isset($_POST['curl'])) {
+            $lnk = trim($_POST['curl']);
+            $cache = new src\createCache();
+            $cache->deleteCacheFile($lnk);
+        }
+        wp_die();
     }
 
     /**

@@ -15,6 +15,8 @@ trait CacheInfo {
      * @var string
      */
     private static string $cacheInfoKey = 'CacheInfoData';
+    static string $cachedFile = WP_CONTENT_DIR . "/cached";
+    static array $cachedLinks = [];
 
     /**
      * Cache Information
@@ -68,7 +70,7 @@ trait CacheInfo {
         }
         $file = ABSPATH . "/sitemaps/type/" . $fName . ".xml";
         $xmlData = simplexml_load_file($file);
-        
+
         if (count($xmlData->url)) {
             return $xmlData->url;
         }
@@ -98,6 +100,7 @@ trait CacheInfo {
                     'type' => self::$currentType,
                     'total' => $totalLinks,
                     'last' => false,
+                    'done' => 0,
                     'status' => 'init'
         ];
         //self::$info->type = self::$currentType;
@@ -105,11 +108,45 @@ trait CacheInfo {
         //self::$info->self::$currentType
     }
 
+    public static function removeSuccCachedInfo() {
+        if (file_exists(self::$cachedFile)) {
+            self::$cachedLinks = [];
+            $inf = unlink(self::$cachedFile);
+        }
+    }
+
+    public static function getSuccCachedInfo() {
+        if (file_exists(self::$cachedFile)) {
+            $content = file_get_contents(self::$cachedFile);
+            if (!empty($content)) {
+                self::$cachedLinks = json_decode($content, true);
+            }
+            //var_dump(self::$cachedLinks);
+        }
+    }
+
+    public static function removeLinkFromCached($link) {
+        self::getSuccCachedInfo();
+        $indx = array_search($link, self::$cachedLinks);
+        unset(self::$cachedLinks[$indx]);
+        //self::$cachedLinks = self::$cachedLinks;
+        self::putSuccCachedInfo();
+    }
+
+    public static function putSuccCachedInfo() {
+
+        if (isset(self::$cachedLinks)) {
+            return file_put_contents(self::$cachedFile, json_encode(array_unique(self::$cachedLinks)));
+        }
+        return false;
+    }
+
     /**
      * 
      */
     public static function refresh() {
         self::init();
+        self::removeSuccCachedInfo();
         self::Bug(); //Find BUG
         $info = [];
         if (self::isDir()) {
@@ -144,6 +181,7 @@ trait CacheInfo {
     }
 
     static function getInfo() {
+        self::getSuccCachedInfo();
         $inf = get_option(self::$cacheInfoKey);
 
         if (!empty($inf) && is_object($inf)) {
@@ -156,6 +194,7 @@ trait CacheInfo {
     }
 
     static function putInfo() {
+        self::putSuccCachedInfo();
         update_option(self::$cacheInfoKey, self::$info);
         return;
     }

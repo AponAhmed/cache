@@ -23,24 +23,38 @@ class createCache {
     }
 
     public function cacheListView() {
+        //self::$currentType = 'page';
+//        $data = self::xmlFileInfo();
+//        echo "<pre>";
+//        $urls = [];
+//        foreach ($data as $uu) {
+//            $urls[] = trim($uu->loc);
+//        }
+//        $availableUrls = array_diff($urls, self::$cachedLinks);
+//        var_dump($availableUrls);
+//        //exit;
+
         self::Bug();
         //echo "<pre>";
         foreach (self::$info as $type => $inf) {
-            // var_dump($inf);
+            //var_dump($inf);
             //Percentage Calculation
             $prs = 0;
-            if ($inf->last !== false) {
+            //if ($inf->last !== false) {
+            if ($inf->done !== 0) {
                 if ($inf->total > 0) {
-                    $prs = (100 / $inf->total) * ($inf->last + 1);
+                    //$prs = (100 / $inf->total) * ($inf->last + 1);
+                    $prs = (100 / $inf->total) * ($inf->done);
                 }
             }
             //so far Complete Status
             $dn = 0;
-            if ($inf->last !== false) {
-                if ($inf->last < $inf->total) {
-                    $dn = $inf->last + 1;
+            if ($inf->last !== false || $inf->done !== 0) {
+                if ($inf->last < $inf->total || $inf->done !== 0) {
+                    // $dn = $inf->last + 1;
+                    $dn = $inf->done;
                 } else {
-                    $dn = $inf->last;
+                    $dn = $inf->done;
                 }
             }
 //            if ($dn >= $inf->total) {
@@ -72,6 +86,7 @@ class createCache {
     }
 
     public function generate() {
+        //echo "<pre>";
         self::Bug();
         $isChanged = false;
         $lastInfo = get_option('lastInfo');
@@ -100,19 +115,39 @@ class createCache {
                         $currentExe = $info->last + 1;
                     }
                     $data = self::xmlFileInfo();
+
                     //Get Data 
                     //echo "<pre>";
-
-                    if (isset($data[$currentExe])) {
-                        //var_dump($obj->loc);
-                        $obj = $data[$currentExe];
-                        $this->cacheG($obj->loc);
+//                    if (isset($data[$currentExe])) {
+//
+//                        //var_dump($obj->loc);
+//                        $obj = $data[$currentExe];
+//                        $this->cacheG($obj->loc);
+//                        self::$info->$type->done += 1;
+//                        self::$cachedLinks[] = (string) $obj->loc;
+//                        $n++;
+//                    }
+                    $urls = [];
+                    foreach ($data as $uu) {
+                        $urls[] = trim($uu->loc);
+                    }
+                    self::getSuccCachedInfo();
+                    $availableUrls = array_diff($urls, self::$cachedLinks);
+                    $availableUrls = array_values($availableUrls);
+                    //var_dump($availableUrls);
+                    //var_dump($obj->loc);
+                    //$obj = $data[$currentExe];
+                    if (count($availableUrls) > 0) {
+                        $ll = $availableUrls[0];
+                        $this->cacheG($ll);
+                        self::$info->$type->done += 1;
+                        self::$cachedLinks[] = (string) $ll;
                         $n++;
                     }
                     //Update Last index
                     self::$info->$type->last = $currentExe;
                     //Set Complete 
-                    if ($currentExe >= $info->total) {
+                    if ($info->done >= $info->total) {
                         self::$info->$type->status = 'complete';
                         self::$info->$type->last = $info->total;
                     }
@@ -137,6 +172,8 @@ class createCache {
     }
 
     function cacheG($url) {
+        // var_dump(self::$cachedLinks);
+
         if ($this->replaceExisting == "true") {
             $this->deleteCacheFile($url);
             $this->file_get_contents_curl($url);
@@ -180,6 +217,7 @@ class createCache {
 
     function deleteCacheFile($lnk) {
         $file = $this->cacheExist($lnk);
+        self::removeLinkFromCached($lnk);
         if ($file) {
             if (!unlink($file)) {
                 return false;
@@ -231,6 +269,35 @@ class createCache {
         self::$info->$type->last = false;
         self::$info->$type->status = "init";
         $this->updateInfo();
+    }
+
+    public static function storeOuterData($url) {
+        global $post, $wpdb;
+        $homePageID = get_option('page_on_front');
+        if ($homePageID == @$post->ID) {
+            $url = trim($url, "/");
+        }
+        $type = @$post->post_type;
+        $projectId = false;
+        if (class_exists('\MPG_Constant')) {
+            $path = \MPG_Helper::mpg_get_request_uri(); // это та часть что идет после папки установки WP. тпиа wp.com/xxx
+            $redirect_rules = \MPG_CoreModel::mpg_get_redirect_rules($path);
+            $projectId = @$redirect_rules['template_id'];
+        }
+        if ($projectId) {
+            $type = 'repeatable';
+        }
+        self::init();
+        if ($type != "" && isset(self::$info->$type)) {
+            if (!in_array($url, self::$cachedLinks)) {
+                self::$cachedLinks[] = $url;
+
+                self::$info->$type->done += 1;
+                //var_dump(self::$cachedLinks, self::$info->$type);
+                //exit;
+                self::putInfo();
+            }
+        }
     }
 
 }

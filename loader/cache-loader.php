@@ -19,6 +19,7 @@ class RootCacheLoader {
     //put your code here
     public static $current_url;
     public static $fileName;
+    public $defaultHeader;
 
     public static function setUrl() {
         $rootScript = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF'];
@@ -36,6 +37,10 @@ class RootCacheLoader {
             //echo "Root Event";
             self::headerBuilder();
             header('cache-type:Root-Event');
+            header("cache-control:public, max-age=31536000");
+            header("expires:" . date("D, j M Y G:i:s", time() + 31536000) . " GMT");
+            header("content-type:text/html");
+            header("pragma:public");
             echo file_get_contents(self::$fileName);
             exit;
         }
