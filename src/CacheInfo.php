@@ -119,7 +119,12 @@ trait CacheInfo {
         if (file_exists(self::$cachedFile)) {
             $content = file_get_contents(self::$cachedFile);
             if (!empty($content)) {
-                self::$cachedLinks = json_decode($content, true);
+                $arr = json_decode($content, true);
+                if (is_array($arr)) {
+                    self::$cachedLinks = $arr;
+                } else {
+                    self::$cachedLinks = [];
+                }
             }
             //var_dump(self::$cachedLinks);
         }
@@ -134,7 +139,6 @@ trait CacheInfo {
     }
 
     public static function putSuccCachedInfo() {
-
         if (isset(self::$cachedLinks)) {
             return file_put_contents(self::$cachedFile, json_encode(array_unique(self::$cachedLinks)));
         }
@@ -183,7 +187,6 @@ trait CacheInfo {
     static function getInfo() {
         self::getSuccCachedInfo();
         $inf = get_option(self::$cacheInfoKey);
-
         if (!empty($inf) && is_object($inf)) {
             $inf = $inf;
         } else {

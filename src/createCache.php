@@ -109,11 +109,11 @@ class createCache {
                     //Current Type set
                     self::$currentType = $type;
                     //Last Info
-                    if ($info->last === false) {
-                        $currentExe = 0;
-                    } else {
-                        $currentExe = $info->last + 1;
-                    }
+                    //if ($info->last === false) {
+                    //    $currentExe = 0;
+                    //} else {
+                    //    $currentExe = $info->last + 1;
+                    //}
                     $data = self::xmlFileInfo();
 
                     //Get Data 
@@ -134,7 +134,7 @@ class createCache {
                     self::getSuccCachedInfo();
                     $availableUrls = array_diff($urls, self::$cachedLinks);
                     $availableUrls = array_values($availableUrls);
-                    //var_dump($availableUrls);
+                    //var_dump($urls,self::$cachedLinks,$availableUrls);
                     //var_dump($obj->loc);
                     //$obj = $data[$currentExe];
                     if (count($availableUrls) > 0) {
@@ -143,9 +143,11 @@ class createCache {
                         self::$info->$type->done += 1;
                         self::$cachedLinks[] = (string) $ll;
                         $n++;
+                    } else {
+                        $info->done = $info->total;
                     }
                     //Update Last index
-                    self::$info->$type->last = $currentExe;
+                    //self::$info->$type->last = $currentExe;
                     //Set Complete 
                     if ($info->done >= $info->total) {
                         self::$info->$type->status = 'complete';
@@ -272,7 +274,10 @@ class createCache {
     }
 
     public static function storeOuterData($url) {
-        global $post, $wpdb;
+        global $post, $wp_query;
+        $current_page_id = $wp_query->get_queried_object_id();
+        $post = get_post($current_page_id);
+
         $homePageID = get_option('page_on_front');
         if ($homePageID == @$post->ID) {
             $url = trim($url, "/");
