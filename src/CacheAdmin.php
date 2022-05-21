@@ -193,7 +193,7 @@ class CacheAdmin {
             $projects = $wpdb->get_results("SELECT urls_array From {$wpdb->prefix}" . \MPG_Constant::MPG_PROJECTS_TABLE . " where  template_id=$post_id and exclude_in_robots !=0");
         }
 
-        echo "<pre>";
+        //echo "<pre>";
         if ($projects) {
             $rootUrl = get_site_url();
             foreach ($projects as $project) {
