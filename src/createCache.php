@@ -275,6 +275,9 @@ class createCache {
 
     public static function storeOuterData($url) {
         global $post, $wp_query;
+        if (!$wp_query) {
+            return;
+        }
         $current_page_id = $wp_query->get_queried_object_id();
         $post = get_post($current_page_id);
 
