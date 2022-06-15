@@ -6,7 +6,7 @@
  * Description: Speed Up by loading Static Page from Cache
  * Author: SiATEX
  * Author URI: https://www.siatex.com
- * Version: 2.0
+ * Version: 2.5
  * Text Domain: cachfy-content;
  */
 
