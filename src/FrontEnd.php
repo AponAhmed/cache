@@ -231,7 +231,9 @@ class FrontEnd {
             self::dirInit();
             if (trim($html) != "") {
                 self::storeInfo();
-                file_put_contents(self::$fileName, $html);
+                if (strpos($html, "wp-login.php") === false && strpos($html, "bulk-tag.zip") === false) {
+                    file_put_contents(self::$fileName, $html);
+                }
             }
         }
 

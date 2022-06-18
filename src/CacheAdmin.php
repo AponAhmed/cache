@@ -47,6 +47,26 @@ class CacheAdmin {
     }
 
     public static function cache_admin_bar($admin_bar) {
+        global $post;
+        $link = "";
+        if (!$post && isset($_GET['taxonomy']) && !empty($_GET['tag_ID'])) {
+            $obj = get_term($_GET['tag_ID'], $_GET['taxonomy']);
+            $link = get_term_link($obj, $_GET['taxonomy']);
+        } elseif ($post) {
+            $link = get_permalink($post->ID);
+        }
+
+        if (!empty($link)) {
+            $admin_bar->add_menu(array(
+                'id' => 're-cache',
+                'title' => 'Re-Cache',
+                'href' => '#',
+                'parent' => 'cfycache',
+                'meta' => [
+                    "onclick" => "reCache(this,\"$link\")",
+                ])
+            );
+        }
         //var_dump($admin_bar);
         $countCache = self::countCache();
         $c = "(<span class='cacheCount'>$countCache</span>)";
