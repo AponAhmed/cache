@@ -197,7 +197,16 @@ class FrontEnd {
      * @return type
      */
     static function storeCache($html) {
+
         if (self::is_ajax()) {
+            return $html;
+        }
+        if (self::isJson($html)) {
+            return $html;
+        }
+
+        self::setFilename();
+        if (file_exists(self::$fileName)) {//If Exist then skip 
             return $html;
         }
         //createCache::getSuccCachedInfo();
@@ -217,11 +226,6 @@ class FrontEnd {
             ];
             $WPHttp->request($actual_link, $arg);
         } else {
-
-            self::setFilename();
-            if (file_exists(self::$fileName)) {//If Exist then skip 
-                return $html;
-            }
             $headers = headers_list();
             if (self::$option->response_header == "") {
                 self::$option->response_header = implode("\n", $headers);
@@ -229,6 +233,7 @@ class FrontEnd {
             }
             //$html;
             self::dirInit();
+
             if (trim($html) != "") {
                 self::storeInfo();
                 if (strpos($html, "wp-login.php") === false && strpos($html, "bulk-tag.zip") === false) {
@@ -250,6 +255,11 @@ class FrontEnd {
 
     public static function storeInfo() {
         createCache::storeOuterData(self::$fullPath);
+    }
+
+    public static function isJson($string) {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
     }
 
     /**
