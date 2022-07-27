@@ -16,8 +16,11 @@ class FrontEnd {
     //put your code here
     public function __construct() {
         //add_action('init', [self::class, 'init'], -9999);
+        add_action('ob_start', [self::class, 'buffer_start'], 99999);
+        add_action('ob_end', [self::class, 'buffer_end'], 99999);
+
         add_action('plugins_loaded', [self::class, 'init'], -9999);
-        add_filter('final_output', [self::class, 'storeCache'], 9999);
+        add_filter('final_output_cache', [self::class, 'storeCache'], 9999);
     }
 
     /**
@@ -176,10 +179,22 @@ class FrontEnd {
         echo ob_get_clean();
     }
 
+    static function buffer_start() {
+        ob_start(function ($content) {
+            return apply_filters('final_output_cache', $content);
+        });
+    }
+
+    static function buffer_end() {
+        //echo "buffer End here";
+        ob_end_flush();
+    }
+
     /**
      * final_output Hook Init Before shutdown 
      */
     public static function FrontEndInit() {
+        return;
         ob_start();
         add_action('shutdown', function () {
             $final = '';
@@ -187,7 +202,7 @@ class FrontEnd {
             for ($i = 0; $i < $levels; $i++) {
                 $final .= ob_get_clean();
             }
-            echo apply_filters('final_output', $final);
+            echo apply_filters('final_output_cache', $final);
         }, 0);
     }
 
