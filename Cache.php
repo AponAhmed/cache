@@ -8,6 +8,7 @@
  * Author URI: https://www.siatex.com
  * Version: 2.9
  * Text Domain: cachfy-content;
+ * Required PHP version: 7.4 or later
  */
 
 namespace CacheFy;
@@ -16,6 +17,7 @@ use CacheFy\src\FrontEnd;
 use CacheFy\src\CacheAdmin;
 
 /* Plugin Defination */
+
 define('CFY', dirname(__FILE__));
 if (!defined('CFY_DIR')) {
     define('CFY_DIR', WP_CONTENT_DIR . "/cache/");
@@ -34,7 +36,8 @@ require 'vendor/autoload.php';
 //muplugins_loaded
 //plugins_loaded
 
-class Cache {
+class Cache
+{
 
     use src\Methods;
 
@@ -42,7 +45,8 @@ class Cache {
     public object $cacheAdmin;
 
     //put your code here
-    public function __construct() {
+    public function __construct()
+    {
 
         register_activation_hook(__FILE__, [self::class, 'cache_pre_active_task']);
         register_deactivation_hook(__FILE__, [self::class, 'cache_uninstall']);
@@ -62,7 +66,8 @@ class Cache {
         }
     }
 
-    function refresh_cache() {
+    function refresh_cache()
+    {
         if (isset($_POST['curl'])) {
             $lnk = trim($_POST['curl']);
             $cache = new src\createCache();
@@ -72,7 +77,8 @@ class Cache {
         wp_die();
     }
 
-    function remove_cache() {
+    function remove_cache()
+    {
         if (isset($_POST['curl'])) {
             $lnk = trim($_POST['curl']);
             $cache = new src\createCache();
@@ -85,26 +91,28 @@ class Cache {
      * Plugin Initialize
      * @return \CacheFy\Cache
      */
-    static function init() {
+    static function init()
+    {
         return new Cache();
     }
 
     /**
      * Plugin Active Hook
      */
-    public static function cache_pre_active_task() {
+    public static function cache_pre_active_task()
+    {
         self::dirInit();
     }
 
     /**
      * Plugin Deactivation Hook
      */
-    public static function cache_uninstall() {
+    public static function cache_uninstall()
+    {
         self::rrmdir(CFY_DIR);
         self::RemMuLoader();
         self::RemRootLoader();
     }
-
 }
 
 Cache::init();
