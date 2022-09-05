@@ -61,8 +61,10 @@ class createCache {
 //                $inf->status = "complete";
 //            }
             //Triger Check
+            $jsFunc = "trigCache";
             if ($inf->status === "complete") {
                 $trg = "Re-Cache";
+                $jsFunc = "reCacheSingle";
             } else {
                 $trg = $inf->status === "init" || $inf->status === false ? "Start" : "Stop";
             }
@@ -76,7 +78,7 @@ class createCache {
 
                 echo "<div class='itemControl'>"
                 . "<button type='button' class='cacheCbtn cln' onclick='cleanCache(\"$inf->type\",this)'>Clean</button>"
-                . "<button type='button' class='cacheCbtn $trg' onclick='trigCache(\"$inf->type\",this)'>$trg</button></div>"
+                . "<button type='button' class='cacheCbtn $trg' onclick='$jsFunc(\"$inf->type\",this)'>$trg</button></div>"
                 . "</div>";
 
                 echo "</div>";
@@ -261,6 +263,25 @@ class createCache {
         $this->cacheListView();
     }
 
+    function reCache() {
+        self::Bug();
+        $type = $_POST['type'];
+        $singleInfo = self::$info->$type;
+        $lnks = self::xmlFileInfo($singleInfo->type);
+        foreach ($lnks as $url) {
+            $link = $url->loc;
+            self::removeLinkFromCached($link);    
+        }
+        
+        self::$info->$type->last = 0;
+        self::$info->$type->status = true;
+        self::$info->$type->done = 0;
+        //var_dump(self::$info->$type);
+        $this->updateInfo();
+
+        $this->cacheListView();
+    }
+
     public function cleanCacheByType($type) {
         $singleInfo = self::$info->$type;
         $lnks = self::xmlFileInfo($singleInfo->type);
@@ -270,6 +291,7 @@ class createCache {
         }
         self::$info->$type->last = false;
         self::$info->$type->status = "init";
+        self::$info->$type->done = 0;
         $this->updateInfo();
     }
 

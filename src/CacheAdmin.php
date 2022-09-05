@@ -32,6 +32,7 @@ class CacheAdmin {
         add_action('wp_ajax_replaceExistingTrig', [$this->CreateCache, 'replaceExistingTrig']);
         add_action('wp_ajax_rq2Server', [$this->CreateCache, 'generate']);
         add_action('wp_ajax_cleanCache', [$this->CreateCache, 'cleanCache']);
+        add_action('wp_ajax_reCache', [$this->CreateCache, 'reCache']);
 
         //Admin Bar
         add_action('admin_bar_menu', [self::class, 'cache_admin_bar'], 100);

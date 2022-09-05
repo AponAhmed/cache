@@ -146,6 +146,17 @@ function cleanCache(type, _this) {
         jQuery(".ListWrap").html(data);
     });
 }
+function reCacheSingle(type, _this) {
+    jQuery(_this).html('...');
+    CacheInProcess = true;
+    jQuery.post(cacheJsObject.ajax_url, {action: 'reCache', 'type': type}, function (data) {
+        isComplete = false;
+        jQuery(".ListWrap").html(data);
+        loadCacheInfo(jQuery);
+        CacheInProcess = false;
+    });
+}
+
 
 function rq2Server() {
     if (!CacheInProcess && !isComplete) {
