@@ -6,7 +6,7 @@
  * Description: Speed Up by loading Static Page from Cache
  * Author: SiATEX
  * Author URI: https://www.siatex.com
- * Version: 3.0.1
+ * Version: 3.0.2
  * Text Domain: cachfy-content;
  * Required PHP version: 7.4 or later
  */

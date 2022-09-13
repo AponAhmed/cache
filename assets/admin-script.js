@@ -4,6 +4,7 @@ var loadingSvg = '<svg xmlns="http://www.w3.org/2000/svg" style="max-width:22px"
 
 var CacheInProcess = false;//Process Flag for Global 
 var isComplete = false;
+var cacheStop = false;
 
 jQuery(function ($) {
     $(document).ready(function () {
@@ -11,6 +12,9 @@ jQuery(function ($) {
     })
 });
 
+function stopGenerate() {
+    cacheStop = true;
+}
 function loadCacheInfo($) {
     CacheInProcess = true;
     var data = {action: "cacheListView"};
@@ -113,8 +117,12 @@ function trigCache(type, _this) {
     btn.html('<span class="dashicons dashicons-update loading"></span>');
     var data = {action: "trigCache", type: type};
     jQuery.post(cacheJsObject.ajax_url, data, function (response) {
+        if (jQuery(_this).html() == 'Start') {
+            cacheStop = false;
+        }
         loadCacheInfo(jQuery);
         CacheInProcess = false;
+
     });
 }
 
@@ -126,6 +134,7 @@ function startAllCache(_this) {
     jQuery.post(cacheJsObject.ajax_url, {action: "startAllCache"}, function (response) {
         jQuery(_this).html(response);
         loadCacheInfo(jQuery);
+        cacheStop = false;
     });
 }
 
@@ -159,17 +168,23 @@ function reCacheSingle(type, _this) {
 
 
 function rq2Server() {
-    if (!CacheInProcess && !isComplete) {
+    if (!CacheInProcess && !isComplete && !cacheStop) {
+        jQuery('.RQLog').html('Request in Processing');
         CacheInProcess = true;
         jQuery.post(cacheJsObject.ajax_url, {action: 'rq2Server'}, function (data) {
             CacheInProcess = false;
             if (data == 'Complete') {
                 isComplete = true;
+                jQuery('.RQLog').html('Complete');
             } else {
                 jQuery(".ListWrap").html(data);
+                jQuery('.RQLog').html('process End');
             }
             //loadCacheInfo(jQuery);
         });
+    }
+    if (cacheStop) {
+        jQuery('.RQLog').html('Paused');
     }
     //console.log('called');
 }
@@ -186,4 +201,4 @@ function reCache(_this, CurrentUrl) {
     });
 }
 
-setInterval(rq2Server, 1000);
+setInterval(rq2Server, 1500);

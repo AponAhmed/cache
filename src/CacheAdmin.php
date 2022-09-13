@@ -185,11 +185,13 @@ class CacheAdmin {
                                     <button type="button" onclick="cacheCreateRefresh(this)" title="Load or Refrash with Sitemap" class="btn btn-cms-default"><span class="dashicons dashicons-update"></span></button>
                                     &nbsp; &nbsp;<label><input value="1" onchange="replaceExistingTrig(this)" type="checkbox" <?php echo isset($this->CreateCache->replaceExisting) && $this->CreateCache->replaceExisting == 'true' ? "checked" : "" ?> name='cahceOption[replaceExisting]'>&nbsp;Replace Existing Cache</label>
                                 </div>
+                                <button type="button" onclick="stopGenerate(this)" class="btn btn-cms-default btn-sm">Pause</button>
                                 <button type="button" onclick="startAllCache(this)" class="btn btn-cms-default btn-sm">Start All</button>
                             </div>
                             <div class="ListWrap">
                                 <!-- Ajax -->
                             </div>
+                            <div class="RQLog" style="padding: 10px;font-size: 11px;color: #999;"></div>
                         </div>
                         <div class="tab-pane" id="dbOptimize">
                             <br>
