@@ -16,9 +16,10 @@ class createCache {
     //put your code here
     use CacheInfo;
 
-    public function __construct() {
+    public function __construct($max = 1) {
         $this->replaceExisting = get_option('replaceExistingCache');
         $this->domainAdd = site_url();
+        $this->max_process = $max;
         self::init();
     }
 
@@ -102,33 +103,16 @@ class createCache {
                 self::$currentType = $firstType->type;
             }
         }
-
         $n = 0;
         if (self::$info) {
+            $brk = false;
             foreach (self::$info as $type => $info) {
                 if ($info->status === true) {
                     $isChanged = true;
                     //Current Type set
                     self::$currentType = $type;
-                    //Last Info
-                    //if ($info->last === false) {
-                    //    $currentExe = 0;
-                    //} else {
-                    //    $currentExe = $info->last + 1;
-                    //}
-                    $data = self::xmlFileInfo();
 
-                    //Get Data 
-                    //echo "<pre>";
-//                    if (isset($data[$currentExe])) {
-//
-//                        //var_dump($obj->loc);
-//                        $obj = $data[$currentExe];
-//                        $this->cacheG($obj->loc);
-//                        self::$info->$type->done += 1;
-//                        self::$cachedLinks[] = (string) $obj->loc;
-//                        $n++;
-//                    }
+                    $data = self::xmlFileInfo();
                     $urls = [];
                     foreach ($data as $uu) {
                         $urls[] = trim($uu->loc);
@@ -136,15 +120,24 @@ class createCache {
                     self::getSuccCachedInfo();
                     $availableUrls = array_diff($urls, self::$cachedLinks);
                     $availableUrls = array_values($availableUrls);
-                    //var_dump($urls,self::$cachedLinks,$availableUrls);
+                    //var_dump($urls, self::$cachedLinks, $availableUrls);
                     //var_dump($obj->loc);
                     //$obj = $data[$currentExe];
                     if (count($availableUrls) > 0) {
-                        $ll = $availableUrls[0];
-                        $this->cacheG($ll);
-                        self::$info->$type->done += 1;
-                        self::$cachedLinks[] = (string) $ll;
-                        $n++;
+                        foreach ($availableUrls as $ll) {
+                            $this->cacheG($ll);
+                            self::$info->$type->done += 1;
+                            if (self::$info->$type->done >= count($urls)) {
+                                self::$info->$type->done = count($urls);
+                            }
+                            self::$cachedLinks[] = (string) $ll;
+                            $n++;
+                            if ($n == $this->max_process) {
+                                $brk = true;
+                                break;
+                            }
+                        }
+                        //$ll = $availableUrls[0];
                     } else {
                         $info->done = $info->total;
                     }
@@ -158,12 +151,11 @@ class createCache {
                     //$this->info->$type->status = true;
                     //var_dump($this->info);
                 }
-                if ($n == $this->max_process) {
+                if ($n == $this->max_process || $brk) {
                     break;
                 }
             }
         }
-
         //echo 1;
         if ($isChanged) {
             $this->updateInfo();
@@ -171,7 +163,6 @@ class createCache {
         } else {
             echo "Complete";
         }
-
         wp_die();
     }
 
@@ -270,9 +261,9 @@ class createCache {
         $lnks = self::xmlFileInfo($singleInfo->type);
         foreach ($lnks as $url) {
             $link = $url->loc;
-            self::removeLinkFromCached($link);    
+            self::removeLinkFromCached($link);
         }
-        
+
         self::$info->$type->last = 0;
         self::$info->$type->status = true;
         self::$info->$type->done = 0;

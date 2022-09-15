@@ -27,7 +27,8 @@ class CacheAdmin {
         add_action('wp_ajax_startAllCache', [createCache::class, 'startAllCache']);
         add_action('wp_ajax_trigCache', [createCache::class, 'trigCache']);
 
-        $this->CreateCache = new createCache();
+        $maxAtTime = isset(self::$option->n) ? self::$option->n : 1;
+        $this->CreateCache = new createCache($maxAtTime);
         add_action('wp_ajax_cacheListView', [$this->CreateCache, 'cacheListView']);
         add_action('wp_ajax_replaceExistingTrig', [$this->CreateCache, 'replaceExistingTrig']);
         add_action('wp_ajax_rq2Server', [$this->CreateCache, 'generate']);
@@ -174,6 +175,20 @@ class CacheAdmin {
                                 <div>
                                     <textarea cols="100" rows="8" placeholder="Response Headers" name="cahceOption[response_header]"><?php echo isset(self::$option->response_header) ? self::$option->response_header : "" ?></textarea>
                                     <br><span class="description">Each Header will be new line. Ex: "content-encoding:gzip [line-break] cache-pilicy:none"</span>
+                                </div>
+                            </div>
+                            <div class="cache-option-wrap">
+                                <label>Number of page</label>
+                                <div>
+                                    <input type="text" value="<?php echo isset(self::$option->n) ? self::$option->n : 2 ?>" name="cahceOption[n]">
+                                    <br><span class="description">How many page will generate at single Request</span>
+                                </div>
+                            </div>
+                            <div class="cache-option-wrap">
+                                <label>Delay</label>
+                                <div>
+                                    <input type="text" onchange="intValSet(this.value * 1000)" id="intVal" value="<?php echo isset(self::$option->rqDelay) ? self::$option->rqDelay : 2 ?>" name="cahceOption[rqDelay]">
+                                    <br><span class="description">Delay Between Each Request (in Second)</span>
                                 </div>
                             </div>
                         </div>

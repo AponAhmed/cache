@@ -5,10 +5,15 @@ var loadingSvg = '<svg xmlns="http://www.w3.org/2000/svg" style="max-width:22px"
 var CacheInProcess = false;//Process Flag for Global 
 var isComplete = false;
 var cacheStop = false;
+var intVal = 1500;
+//var intvalInstance;
+var inWork = false;
 
 jQuery(function ($) {
     $(document).ready(function () {
         loadCacheInfo($);
+        intVal = Number(jQuery("#intVal").val()) * 1000;
+        //intValSet(intVal);
     })
 });
 
@@ -122,7 +127,12 @@ function trigCache(type, _this) {
         }
         loadCacheInfo(jQuery);
         CacheInProcess = false;
-
+        if (!inWork) {
+            rq2Server();
+        }
+        if (cacheStop) {
+            cacheStop = false;
+        }
     });
 }
 
@@ -135,6 +145,9 @@ function startAllCache(_this) {
         jQuery(_this).html(response);
         loadCacheInfo(jQuery);
         cacheStop = false;
+        if (!inWork) {
+            rq2Server();
+        }
     });
 }
 
@@ -166,21 +179,33 @@ function reCacheSingle(type, _this) {
     });
 }
 
-
 function rq2Server() {
+    let ts = Date.now();
+
     if (!CacheInProcess && !isComplete && !cacheStop) {
         jQuery('.RQLog').html('Request in Processing');
         CacheInProcess = true;
-        jQuery.post(cacheJsObject.ajax_url, {action: 'rq2Server'}, function (data) {
-            CacheInProcess = false;
-            if (data == 'Complete') {
-                isComplete = true;
-                jQuery('.RQLog').html('Complete');
-            } else {
-                jQuery(".ListWrap").html(data);
-                jQuery('.RQLog').html('process End');
-            }
-            //loadCacheInfo(jQuery);
+        jQuery.ajax({
+            type: "POST",
+            cache: false,
+            headers: {"cache-control": "no-cache"},
+            url: cacheJsObject.ajax_url,
+            data: {action: 'rq2Server'},
+            success: function (data) {
+                CacheInProcess = false;
+                if (data == 'Complete') {
+                    isComplete = true;
+                    inWork = false;
+                    jQuery('.RQLog').html('Request End & Complete');
+                } else {
+                    inWork = true;
+                    let te = Date.now();
+                    let tkTime = (te - ts) / 1000;
+                    jQuery(".ListWrap").html(data);
+                    jQuery('.RQLog').html('Request End, Time taken:' + Number(tkTime).toFixed(2) + 's and  ' + Math.round((intVal / 1000)) + 's waiting for next request');
+                }
+                setTimeout(rq2Server, intVal);
+            },
         });
     }
     if (cacheStop) {
@@ -201,4 +226,12 @@ function reCache(_this, CurrentUrl) {
     });
 }
 
-setInterval(rq2Server, 1500);
+
+function intValSet(intv) {
+    //console.log(intv);
+    intVal = intv;
+    //clearInterval(intvalInstance);
+    //intvalInstance = setInterval(rq2Server, intVal);
+}
+
+rq2Server();
