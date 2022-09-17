@@ -151,6 +151,7 @@ require 'cache-loader.php';
      */
     public static function setFilename() {
         global $post;
+
         $rootScript = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF'];
         $pathInfo = pathinfo($rootScript);
         if (isset($pathInfo['dirname'])) {
@@ -166,7 +167,7 @@ require 'cache-loader.php';
         $fullPath = $siteUrl . "/" . $rqUri;
         $fullPath = preg_replace('/([^:])(\/{2,})/', '$1/', $fullPath);
         $homePageID = get_option('page_on_front');
-        if ($homePageID == @$post->ID) {
+        if (isset($post->ID) && $homePageID == $post->ID) {
             $fullPath = trim($fullPath, "/");
         }
         self::$fullPath = $fullPath;
