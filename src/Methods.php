@@ -24,7 +24,7 @@ trait Methods {
         //self::$loaderRoot = ABSPATH . "cache-loader.php";
         //self::$loaderMu = WPMU_PLUGIN_DIR . "/mu-CacheLoader.php";
 
-        if (!isset(self::$option->enable) || isset(self::$option->disable_loggedin)) {
+        if (!isset(self::$option->enable) || (isset(self::$option->disable_loggedin) && self::$option->disable_loggedin == '1')) {
             self::$option->cache_loader = "init";
         }
 
@@ -96,9 +96,14 @@ trait Methods {
         $scripts = file_get_contents($file);
         //put header information in loader file before create
         $scripts = self::str_replace_first('CFY_HEADERS_JSON', json_encode(self::$headers), $scripts);
-        file_put_contents(self::$loaderRoot, $scripts);
+        $res = file_put_contents(self::$loaderRoot, $scripts);
         //copy($file, self::$loaderRoot);
-        self::modifyLoader();
+        if ($res) {
+            echo "loader File 'cache-loader.php' placed in root\n";
+            if (self::modifyLoader()) {
+                echo " and Root Index Modified\n";
+            }
+        }
     }
 
     /**
@@ -131,7 +136,7 @@ require 'cache-loader.php';
             $indexContent = str_replace($str, "/**", $indexContent);
         }
 
-        file_put_contents(ABSPATH . "index.php", $indexContent);
+        return file_put_contents(ABSPATH . "index.php", $indexContent);
     }
 
     static function is_ssl() {
@@ -161,7 +166,8 @@ require 'cache-loader.php';
                 $rqUri = $_SERVER['REQUEST_URI'];
             }
         }
-        self::$current_url = $rqUri;
+        $urlPart = explode("?", $rqUri);
+        self::$current_url = $urlPart[0];
 
         $siteUrl = site_url();
         $fullPath = $siteUrl . "/" . $rqUri;
@@ -170,7 +176,8 @@ require 'cache-loader.php';
         if (isset($post->ID) && $homePageID == $post->ID) {
             $fullPath = trim($fullPath, "/");
         }
-        self::$fullPath = $fullPath;
+        $urlPart = explode("?", $fullPath);
+        self::$fullPath = $urlPart[0];
         //var_dump(self::$fullPath);
         //exit;
         $md5 = true;

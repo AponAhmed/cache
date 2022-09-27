@@ -249,9 +249,12 @@ class FrontEnd {
             self::dirInit();
 
             if (trim($html) != "") {
-                self::storeInfo();
-                if (strpos($html, "wp-login.php") === false && strpos($html, "bulk-tag.zip") === false) {
-                    file_put_contents(self::$fileName, $html);
+                $code = http_response_code();
+                if ($code == 200) {
+                    self::storeInfo();
+                    if (strpos($html, "wp-login.php") === false && strpos($html, "bulk-tag.zip") === false) {
+                        file_put_contents(self::$fileName, $html);
+                    }
                 }
             }
         }

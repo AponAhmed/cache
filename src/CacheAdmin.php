@@ -159,6 +159,7 @@ class CacheAdmin {
                         <div class="tab-pane" id="cacheSettings">
                             <div class="cache-option-wrap">
                                 <label></label>
+                                <input type="hidden" name="cahceOption[disable_loggedin]" value="0">
                                 <label><input <?php echo isset(self::$option->disable_loggedin) && self::$option->disable_loggedin == '1' ? "checked" : "" ?> type="checkbox" value="1" name="cahceOption[disable_loggedin]">&nbsp;Disable When Logged-in</label>
                             </div>
                             <div class="cache-option-wrap">
@@ -270,6 +271,7 @@ class CacheAdmin {
 
     function cacheLoaderRefresh() {
         self::loaderConfig();
+        wp_die();
     }
 
 }

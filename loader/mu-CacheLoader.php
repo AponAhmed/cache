@@ -33,9 +33,14 @@ class CacheLoader {
         $rootScript = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : $_SERVER['PHP_SELF'];
         $pathInfo = pathinfo($rootScript);
         if (isset($pathInfo['dirname'])) {
-            $rqUri = str_replace($pathInfo['dirname'], "", $_SERVER['REQUEST_URI']);
+            if ($pathInfo['dirname'] != "/") {
+                $rqUri = str_replace($pathInfo['dirname'], "", $_SERVER['REQUEST_URI']);
+            } else {
+                $rqUri = $_SERVER['REQUEST_URI'];
+            }
         }
-        self::$current_url = $rqUri;
+        $urlPart = explode("?", $rqUri);
+        self::$current_url = $urlPart[0];
         self::$fileName = CFY_DIR . md5(self::$current_url);
     }
 
